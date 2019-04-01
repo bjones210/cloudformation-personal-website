@@ -1,0 +1,71 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "zonebjonescloud": {
+            "Type": "AWS::Route53::HostedZone",
+            "Properties": {
+                "Name": "bjones.cloud."
+            }
+        },
+        "dnswwwbjonescloud": {
+            "Type": "AWS::Route53::RecordSetGroup",
+            "Properties": {
+                "HostedZoneId": {
+                    "Ref": "zonebjonescloud"
+                },
+                "RecordSets": [
+                    {
+                        "Name": "www.bjones.cloud.",
+                        "Type": "A",
+                        "AliasTarget": {
+                            "HostedZoneId": "Z3AQBSTGFYJSTF",
+                            "DNSName": "s3-website-us-east-1.amazonaws.com"
+                        }
+                    }
+                ]
+            }
+        },
+        "s3wwwbjonescloud": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "WebsiteConfiguration": {
+                    "IndexDocument": "index.html"
+                },
+                "AccessControl": "Private",
+                "VersioningConfiguration": {
+                    "Status": "Suspended"
+                }
+            }
+        },
+        "s3policywwwbjonescloud": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "Bucket": {
+                    "Ref": "s3wwwbjonescloud"
+                },
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "PublicReadForGetBucketObjects",
+                            "Effect": "Allow",
+                            "Principal": "*",
+                            "Action": "s3:GetObject",
+                            "Resource": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:aws:s3:::",
+                                        "www",
+                                        ".bjones.cloud/*"
+                                    ]
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "Description": "Personal Website Template"
+}
